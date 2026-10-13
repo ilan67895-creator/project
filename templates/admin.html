@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>TradePro - לוח בקרה למנהל המערכת</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+
+    <div class="max-w-6xl mx-auto space-y-8">
+        <h1 class="text-3xl font-bold text-gray-800 border-b-2 border-blue-600 pb-2">
+            📊 לוח בקרה למנהל המערכת (Admin Dashboard)
+        </h1>
+
+        <!-- טבלת משתמשים -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-bold mb-4 text-blue-800">רשימת משתמשים ויתרות במסד הנתונים</h2>
+            <table class="w-full border-collapse border border-gray-200">
+                <thead>
+                    <tr class="bg-gray-200 text-right">
+                        <th class="p-2 border">ID</th>
+                        <th class="p-2 border">שם מלא</th>
+                        <th class="p-2 border">אימייל / שם משתמש</th>
+                        <th class="p-2 border">יתרה (Balance)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="p-2 border">{{ user.id }}</td>
+                        <td class="p-2 border font-medium">{{ user.fullname }}</td>
+                        <td class="p-2 border">{{ user.username }}</td>
+                        <td class="p-2 border text-green-600 font-bold">${{ "{:,.2f}".format(user.balance | float) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- טבלת לוגים של התחברויות -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-bold mb-4 text-purple-800">יומן התחברויות בזמן אמת (Login Activity Logs)</h2>
+            <table class="w-full border-collapse border border-gray-200">
+                <thead>
+                    <tr class="bg-gray-200 text-right">
+                        <th class="p-2 border">משתמש</th>
+                        <th class="p-2 border">סטטוס</th>
+                        <th class="p-2 border">זמן התחברות</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="p-2 border">{{ log.username }}</td>
+                        <td class="p-2 border">
+                            {% if log.status == 'SUCCESS' %}
+                                <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-sm font-bold">הצלחה</span>
+                            {% else %}
+                                <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-sm font-bold">נכשל</span>
+                            {% endif %}
+                        </td>
+                        <td class="p-2 border dir-ltr text-right">{{ log.login_time }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</body>
+</html>
