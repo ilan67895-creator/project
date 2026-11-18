@@ -50,9 +50,9 @@
                     <span class="text-xs text-on-surface-variant mt-1">Smart Investment Platform</span>
                 </div>
             </a>
-            <a href="/" class="flex items-center gap-2 text-sm font-medium text-on-surface-variant hover:text-primary-fixed-dim transition-colors">
-                <span class="material-symbols-outlined text-lg">logout</span>
-                <span>חזרה לאתר</span>
+            <a href="{{ url_for('dashboard') }}" class="flex items-center gap-2 text-sm font-medium text-on-surface-variant hover:text-primary-fixed-dim transition-colors">
+                <span class="material-symbols-outlined text-lg">dashboard</span>
+                <span>חזרה ללוח המעקב</span>
             </a>
         </div>
     </header>
@@ -76,6 +76,20 @@
             </div>
         </section>
 
+        {% if success %}
+        <div role="alert" class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-sm flex items-center gap-3">
+            <span class="material-symbols-outlined text-xl">check_circle</span>
+            <span class="font-medium">{{ success }}</span>
+        </div>
+        {% endif %}
+
+        {% if error %}
+        <div role="alert" class="p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-sm flex items-center gap-3">
+            <span class="material-symbols-outlined text-xl">error</span>
+            <span class="font-medium">{{ error }}</span>
+        </div>
+        {% endif %}
+
         <section class="bg-surface-container rounded-xl border border-surface-container-high shadow-xl overflow-hidden">
             <div class="p-5 sm:p-6 border-b border-surface-container-high flex items-center gap-3">
                 <div class="w-10 h-10 rounded-lg bg-primary-container/10 flex items-center justify-center text-primary-fixed-dim">
@@ -87,26 +101,44 @@
                 </div>
             </div>
             <div class="overflow-x-auto">
-                <table class="w-full min-w-[640px] text-sm text-right">
+                <table class="w-full min-w-[700px] text-sm text-right">
                     <thead class="bg-surface-container-lowest text-xs text-on-surface-variant">
                         <tr>
                             <th scope="col" class="px-5 py-4 font-semibold">מזהה</th>
                             <th scope="col" class="px-5 py-4 font-semibold">שם מלא</th>
                             <th scope="col" class="px-5 py-4 font-semibold">דוא״ל / שם משתמש</th>
                             <th scope="col" class="px-5 py-4 font-semibold">יתרה</th>
+                            <th scope="col" class="px-5 py-4 font-semibold text-center">פעולות</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-surface-container-high">
                         {% for user in users %}
                         <tr class="hover:bg-surface-container-high/50 transition-colors">
                             <td class="px-5 py-4 font-mono text-xs text-outline">{{ user.id }}</td>
-                            <td class="px-5 py-4 font-medium">{{ user.fullname }}</td>
+                            <td class="px-5 py-4 font-medium flex items-center gap-2">
+                                <span>{{ user.fullname }}</span>
+                                {% if user.is_admin %}
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-primary-container/15 text-primary-fixed-dim border border-primary-container/20">מנהל</span>
+                                {% endif %}
+                            </td>
                             <td class="px-5 py-4 text-on-surface-variant" dir="ltr">{{ user.username }}</td>
                             <td class="px-5 py-4 font-mono font-semibold text-primary-fixed-dim" dir="ltr">${{ "{:,.2f}".format(user.balance | float) }}</td>
+                            <td class="px-5 py-4 text-center">
+                                {% if session.get('username') == user.username %}
+                                <span class="text-xs text-outline italic">חשבונך (מחובר)</span>
+                                {% else %}
+                                <form action="{{ url_for('admin_delete_user', user_id=user.id) }}" method="POST" class="inline" onsubmit="return confirm('האם אתה בטוח שברצונך למחוק לצמיתות את החשבון של {{ user.fullname }} ({{ user.username }})? פעולה זו תמחק את כל נתוני החשבון.');">
+                                    <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-500/10 hover:bg-red-500/25 text-red-300 border border-red-500/30 transition-all cursor-pointer active:scale-95" title="מחק חשבון">
+                                        <span class="material-symbols-outlined text-[16px]">person_remove</span>
+                                        <span>מחק חשבון</span>
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </td>
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="4" class="px-5 py-10 text-center text-sm text-on-surface-variant">לא נמצאו משתמשים.</td>
+                            <td colspan="5" class="px-5 py-10 text-center text-sm text-on-surface-variant">לא נמצאו משתמשים.</td>
                         </tr>
                         {% endfor %}
                     </tbody>

@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Trading & Portfolio · TradePro</title>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL@20..48,100..700,0..1&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #0f131c;
+      color: #dfe2ee;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    * { box-sizing: border-box; }
+    body { min-width: 320px; min-height: 100vh; margin: 0; background: #0f131c; }
+
+    /* Header */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 72px;
+      padding: 0 max(24px, calc((100vw - 1100px) / 2));
+      border-bottom: 1px solid #262a33;
+      background: #0a0e16;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+    .brand-group { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+    .brand-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: #00f5a0;
+      color: #003921;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .brand-name { color: #cdffde; font-size: 19px; font-weight: 700; letter-spacing: -.03em; }
+    .account { display: flex; align-items: center; gap: 14px; color: #b9cbbd; font-size: 14px; }
+
+    .balance-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: #181c24;
+      border: 1px solid #00e29350;
+      border-radius: 20px;
+      font-size: 13px;
+    }
+    .balance-pill .label { color: #849588; font-weight: 500; }
+    .balance-pill .val { color: #00f5a0; font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+
+    .btn {
+      border: 1px solid #3b4a40;
+      border-radius: 8px;
+      padding: 8px 14px;
+      background: #181c24;
+      color: #dfe2ee;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      text-decoration: none;
+    }
+    .btn:hover { border-color: #00e293; color: #cdffde; }
+    .btn-primary {
+      background: #00f5a0;
+      color: #003921;
+      border-color: #00f5a0;
+      font-weight: 700;
+      box-shadow: 0 0 16px -2px rgba(0,245,160,0.3);
+    }
+    .btn-primary:hover {
+      background: #00e293;
+      border-color: #00e293;
+      color: #002b18;
+      box-shadow: 0 0 20px 0 rgba(0,245,160,0.45);
+    }
+    .btn-danger {
+      background: rgba(255,180,171,0.1);
+      color: #ffb4ab;
+      border-color: rgba(255,180,171,0.3);
+    }
+    .btn-danger:hover { background: rgba(255,180,171,0.2); border-color: #ffb4ab; }
+
+    /* Main Container */
+    main { width: min(100% - 40px, 1100px); margin: 0 auto; padding: 36px 0 60px; }
+
+    /* Financial Overview Banner */
+    .overview-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 36px;
+    }
+    .stat-card {
+      padding: 20px;
+      border: 1px solid #262a33;
+      border-radius: 12px;
+      background: #181c24;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 104px;
+    }
+    .stat-card.action-card {
+      background: linear-gradient(135deg, #181c24 0%, #1c2626 100%);
+      border-color: #00e29340;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 16px;
+    }
+    .stat-label { font-size: 12px; color: #849588; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+    .stat-value { font-size: 24px; font-family: 'JetBrains Mono', monospace; font-weight: 700; margin-top: 6px; }
+    .stat-value.green { color: #00f5a0; }
+    .stat-value.blue { color: #7bd0ff; }
+
+    /* Section Headers */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+    .section-title { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.02em; display: flex; align-items: center; gap: 8px; }
+    .feed-status { display: flex; align-items: center; gap: 8px; color: #b9cbbd; font-size: 13px; }
+    .feed-dot { width: 8px; height: 8px; border-radius: 50%; background: #849588; }
+    .feed-dot.live { background: #00e293; box-shadow: 0 0 10px #00e293; }
+    .feed-dot.error { background: #ffb4ab; }
+
+    /* Portfolio Section */
+    .portfolio-box {
+      border: 1px solid #262a33;
+      border-radius: 12px;
+      background: #181c24;
+      overflow: hidden;
+      margin-bottom: 36px;
+    }
+    .portfolio-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+    .portfolio-table th {
+      background: #0a0e16;
+      padding: 12px 18px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #849588;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .portfolio-table td { padding: 16px 18px; border-bottom: 1px solid #262a33; }
+    .portfolio-table tr:last-child td { border-bottom: none; }
+    .portfolio-table tr:hover { background: #20242d; }
+    .empty-state { padding: 36px 20px; text-align: center; color: #849588; font-size: 14px; }
+
+    /* Watchlist Grid */
+    .quotes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 36px; }
+    .quote {
+      padding: 20px;
+      border: 1px solid #262a33;
+      border-radius: 12px;
+      background: #181c24;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+    .quote:hover { border-color: #3b4a40; transform: translateY(-2px); }
+    .quote-top { display: flex; align-items: start; justify-content: space-between; gap: 10px; }
+    .symbol { margin: 0; font-size: 16px; font-weight: 700; letter-spacing: .04em; }
+    .company { margin: 3px 0 0; color: #849588; font-size: 12px; }
+    .price-row { display: flex; align-items: baseline; justify-content: space-between; margin: 18px 0 14px; }
+    .price { margin: 0; font-size: 24px; font-family: 'JetBrains Mono', monospace; font-weight: 600; letter-spacing: -.02em; }
+    .change { font-size: 13px; font-family: 'JetBrains Mono', monospace; }
+    .change.up { color: #00e293; }
+    .change.down { color: #ffb4ab; }
+    .change.neutral { color: #b9cbbd; }
+    .quote-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 10px; border-top: 1px solid #262a33; }
+    .quote-time { color: #849588; font-size: 11px; }
+
+    /* Trade Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 14, 22, 0.85);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 16px;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal-content {
+      width: min(100%, 480px);
+      background: #181c24;
+      border: 1px solid #3b4a40;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+      overflow: hidden;
+      animation: modalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.96) translateY(8px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .modal-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid #262a33;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #0a0e16;
+    }
+    .modal-title { margin: 0; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .modal-close { background: none; border: none; color: #849588; font-size: 20px; cursor: pointer; padding: 4px; border-radius: 6px; }
+    .modal-close:hover { color: #dfe2ee; background: #262a33; }
+    .modal-body { padding: 24px; }
+
+    /* Buy/Sell Tabs */
+    .action-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px; }
+    .action-tab {
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #3b4a40;
+      background: #0f131c;
+      color: #b9cbbd;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s ease;
+    }
+    .action-tab.active-buy { background: #00f5a0; color: #003921; border-color: #00f5a0; }
+    .action-tab.active-sell { background: #ffb4ab; color: #690005; border-color: #ffb4ab; }
+
+    /* Form Fields */
+    .form-group { margin-bottom: 18px; }
+    .form-label { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; color: #dfe2ee; margin-bottom: 8px; }
+    .form-label span.sub { color: #849588; font-weight: 400; }
+    select, input[type="number"] {
+      width: 100%;
+      height: 44px;
+      padding: 0 14px;
+      background: #0a0e16;
+      border: 1px solid #3b4a40;
+      border-radius: 8px;
+      color: #dfe2ee;
+      font-size: 15px;
+      font-family: inherit;
+    }
+    select:focus, input[type="number"]:focus { outline: none; border-color: #00f5a0; box-shadow: 0 0 0 2px rgba(0,245,160,0.2); }
+
+    .quick-shares { display: flex; gap: 6px; margin-top: 8px; }
+    .quick-btn {
+      flex: 1;
+      padding: 6px 0;
+      background: #0f131c;
+      border: 1px solid #262a33;
+      border-radius: 6px;
+      color: #b9cbbd;
+      font-size: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      cursor: pointer;
+    }
+    .quick-btn:hover { border-color: #00e293; color: #00f5a0; }
+
+    /* Trade Summary Box */
+    .trade-summary {
+      background: #0a0e16;
+      border: 1px solid #262a33;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .summary-row { display: flex; justify-content: space-between; font-size: 13px; color: #b9cbbd; margin-bottom: 8px; }
+    .summary-row:last-child { margin-bottom: 0; padding-top: 8px; border-top: 1px solid #262a33; font-weight: 700; color: #dfe2ee; font-size: 15px; }
+    .summary-row .mono { font-family: 'JetBrains Mono', monospace; }
+
+    /* Trade Alert Notification */
+    .trade-alert {
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-bottom: 18px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+    .trade-alert.success { display: flex; background: rgba(0,245,160,0.1); border: 1px solid rgba(0,245,160,0.3); color: #00f5a0; }
+    .trade-alert.error { display: flex; background: rgba(255,180,171,0.1); border: 1px solid rgba(255,180,171,0.3); color: #ffb4ab; }
+
+    .submit-trade-btn {
+      width: 100%;
+      height: 48px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s ease;
+    }
+    .submit-trade-btn.buy { background: #00f5a0; color: #003921; box-shadow: 0 0 20px rgba(0,245,160,0.3); }
+    .submit-trade-btn.buy:hover { background: #00e293; box-shadow: 0 0 28px rgba(0,245,160,0.5); }
+    .submit-trade-btn.sell { background: #ffb4ab; color: #690005; box-shadow: 0 0 20px rgba(255,180,171,0.3); }
+    .submit-trade-btn.sell:hover { background: #ff9f93; box-shadow: 0 0 28px rgba(255,180,171,0.5); }
+    .submit-trade-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* Trades History Section */
+    .history-box {
+      border: 1px solid #262a33;
+      border-radius: 12px;
+      background: #181c24;
+      overflow: hidden;
+      margin-top: 14px;
+    }
+
+    @media (max-width: 900px) {
+      .overview-grid { grid-template-columns: repeat(2, 1fr); }
+      .quotes { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      header { min-height: 64px; padding: 0 16px; }
+      .account { gap: 8px; }
+      .balance-pill { padding: 4px 10px; font-size: 12px; }
+      .overview-grid { grid-template-columns: 1fr; }
+      .quotes { grid-template-columns: 1fr; }
+      main { padding-top: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <a class="brand-group" href="{{ url_for('dashboard') }}">
+      <div class="brand-icon">
+        <span class="material-symbols-outlined" style="font-size:22px">show_chart</span>
+      </div>
+      <span class="brand-name">TradePro</span>
+    </a>
+
+    <div class="account">
+      <!-- User Cash Balance Pill -->
+      <div class="balance-pill" title="Your available trading cash">
+        <span class="material-symbols-outlined" style="font-size:16px;color:#00f5a0">account_balance_wallet</span>
+        <span class="label">Cash:</span>
+        <span class="val" id="header-balance">${{ "{:,.2f}".format(balance) }}</span>
+      </div>
+
+      <!-- Quick Trade Header Button -->
+      <button type="button" class="btn btn-primary" onclick="openTradeModal()">
+        <span class="material-symbols-outlined" style="font-size:16px">bolt</span>
+        <span>Trade Now</span>
+      </button>
+
+      {% if session.get('is_admin') %}
+      <a href="{{ url_for('admin_dashboard') }}" class="btn" style="border-color:#00e29350;color:#00e293">
+        <span>⚙️ Admin Panel</span>
+      </a>
+      {% endif %}
+
+      <span style="font-weight:500;color:#dfe2ee">{{ current_user }}</span>
+
+      <form action="{{ url_for('logout') }}" method="post" style="margin:0">
+        <button type="submit" class="btn">Sign out</button>
+      </form>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main>
+    <!-- Account Financial Overview Cards -->
+    <section class="overview-grid" aria-label="Account Overview">
+      <div class="stat-card">
+        <span class="stat-label">Available Cash</span>
+        <div class="stat-value green" id="stat-cash">${{ "{:,.2f}".format(balance) }}</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Portfolio Value</span>
+        <div class="stat-value blue" id="stat-portfolio">$0.00</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Total Net Worth</span>
+        <div class="stat-value" id="stat-networth">${{ "{:,.2f}".format(balance) }}</div>
+      </div>
+      <div class="stat-card action-card">
+        <button type="button" class="btn btn-primary" style="width:100%;height:44px;justify-content:center;font-size:14px" onclick="openTradeModal()">
+          <span class="material-symbols-outlined" style="font-size:18px">payments</span>
+          <span>Open Trade Order</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- My Portfolio (Holdings) Section -->
+    <section aria-labelledby="portfolio-title">
+      <div class="section-header">
+        <h2 class="section-title" id="portfolio-title">
+          <span class="material-symbols-outlined" style="color:#00f5a0;font-size:22px">pie_chart</span>
+          <span>Your Portfolio Holdings</span>
+        </h2>
+        <span style="font-size:13px;color:#849588" id="holdings-count">{{ portfolio|length }} Position(s)</span>
+      </div>
+
+      <div class="portfolio-box">
+        <div style="overflow-x:auto">
+          <table class="portfolio-table" id="portfolio-table">
+            <thead>
+              <tr>
+                <th>Symbol</th>
+                <th>Shares</th>
+                <th>Avg Buy Price</th>
+                <th>Current Price</th>
+                <th>Total Value</th>
+                <th>Profit / Loss</th>
+                <th style="text-align:right">Action</th>
+              </tr>
+            </thead>
+            <tbody id="portfolio-tbody">
+              {% if portfolio %}
+                {% for pos in portfolio %}
+                <tr id="pos-row-{{ pos.symbol }}">
+                  <td>
+                    <strong style="color:#dfe2ee;letter-spacing:0.04em">{{ pos.symbol }}</strong>
+                  </td>
+                  <td class="mono" style="font-weight:600">{{ pos.shares }}</td>
+                  <td class="mono">${{ "{:,.2f}".format(pos.average_price) }}</td>
+                  <td class="mono" id="pos-curr-{{ pos.symbol }}">Loading…</td>
+                  <td class="mono" id="pos-val-{{ pos.symbol }}" style="font-weight:600">Loading…</td>
+                  <td id="pos-pnl-{{ pos.symbol }}">Loading…</td>
+                  <td style="text-align:right">
+                    <button type="button" class="btn" style="padding:4px 10px;font-size:12px" onclick="openTradeModal('{{ pos.symbol }}', 'BUY')">Buy</button>
+                    <button type="button" class="btn btn-danger" style="padding:4px 10px;font-size:12px" onclick="openTradeModal('{{ pos.symbol }}', 'SELL')">Sell</button>
+                  </td>
+                </tr>
+                {% endfor %}
+              {% else %}
+                <tr id="empty-portfolio-row">
+                  <td colspan="7" class="empty-state">
+                    You do not own any stocks yet. Click <strong>"Trade Now"</strong> or select a stock from the watchlist below to start investing!
+                  </td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Market Watchlist Section -->
+    <section aria-labelledby="watchlist-title">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title" id="watchlist-title">
+            <span class="material-symbols-outlined" style="color:#7bd0ff;font-size:22px">candlestick_chart</span>
+            <span>Market Watchlist</span>
+          </h2>
+          <p style="margin:4px 0 0;font-size:13px;color:#849588">Real-time live prices. Click Trade to instantly buy or sell.</p>
+        </div>
+        <div class="feed-status" role="status" aria-live="polite">
+          <span class="feed-dot" id="feed-dot"></span>
+          <span id="feed-status">Connecting to market feed…</span>
+        </div>
+      </div>
+
+      <div class="quotes" id="quotes" aria-label="Stock quotes">
+        <div class="stat-card" style="grid-column:1/-1;text-align:center;color:#849588">Loading quotes…</div>
+      </div>
+    </section>
+
+    <!-- Recent Trade Activity -->
+    <section aria-labelledby="history-title" style="margin-top:20px">
+      <div class="section-header">
+        <h2 class="section-title" id="history-title">
+          <span class="material-symbols-outlined" style="color:#849588;font-size:20px">history</span>
+          <span>Recent Trade Activity</span>
+        </h2>
+      </div>
+
+      <div class="history-box">
+        <div style="overflow-x:auto">
+          <table class="portfolio-table">
+            <thead>
+              <tr>
+                <th>Action</th>
+                <th>Symbol</th>
+                <th>Shares</th>
+                <th>Price</th>
+                <th>Total Value</th>
+                <th>Date & Time</th>
+              </tr>
+            </thead>
+            <tbody id="trade-history-tbody">
+              {% if trades_history %}
+                {% for t in trades_history %}
+                <tr>
+                  <td>
+                    {% if t.action == 'BUY' %}
+                    <span style="color:#00f5a0;font-weight:700">BUY</span>
+                    {% else %}
+                    <span style="color:#ffb4ab;font-weight:700">SELL</span>
+                    {% endif %}
+                  </td>
+                  <td><strong>{{ t.symbol }}</strong></td>
+                  <td class="mono">{{ t.shares }}</td>
+                  <td class="mono">${{ "{:,.2f}".format(t.price) }}</td>
+                  <td class="mono" style="font-weight:600">${{ "{:,.2f}".format(t.total_amount) }}</td>
+                  <td style="color:#849588;font-size:12px">{{ t.trade_time }}</td>
+                </tr>
+                {% endfor %}
+              {% else %}
+                <tr id="empty-history-row">
+                  <td colspan="6" class="empty-state">No trades executed yet.</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Interactive Trade Modal -->
+  <div class="modal-backdrop" id="tradeModal" onclick="handleBackdropClick(event)">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <span class="material-symbols-outlined" style="color:#00f5a0">currency_exchange</span>
+          <span>Execute Trade Order</span>
+        </h3>
+        <button type="button" class="modal-close" onclick="closeTradeModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Buy / Sell Action Switcher -->
+        <div class="action-tabs">
+          <div class="action-tab active-buy" id="tabBuy" onclick="setTradeAction('BUY')">BUY STOCK</div>
+          <div class="action-tab" id="tabSell" onclick="setTradeAction('SELL')">SELL STOCK</div>
+        </div>
+
+        <!-- Alert Notification in Modal -->
+        <div class="trade-alert" id="modalAlert">
+          <span class="material-symbols-outlined" id="modalAlertIcon">check_circle</span>
+          <span id="modalAlertMsg"></span>
+        </div>
+
+        <!-- Stock Selector -->
+        <div class="form-group">
+          <label class="form-label" for="tradeStockSelect">
+            <span>Select Stock</span>
+            <span class="sub" id="tradeSelectedPriceBadge">Price: $0.00</span>
+          </label>
+          <select id="tradeStockSelect" onchange="onStockSelectChange()">
+            {% for symbol, company in stocks.items() %}
+            <option value="{{ symbol }}">{{ symbol }} - {{ company }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Shares Input -->
+        <div class="form-group">
+          <label class="form-label" for="tradeSharesInput">
+            <span>Shares Quantity</span>
+            <span class="sub" id="tradeAvailableContext">Cash: ${{ "{:,.2f}".format(balance) }}</span>
+          </label>
+          <input type="number" id="tradeSharesInput" min="1" step="1" value="1" oninput="calculateTradeTotal()">
+          <div class="quick-shares">
+            <button type="button" class="quick-btn" onclick="setSharesQuantity(1)">1</button>
+            <button type="button" class="quick-btn" onclick="setSharesQuantity(5)">5</button>
+            <button type="button" class="quick-btn" onclick="setSharesQuantity(10)">10</button>
+            <button type="button" class="quick-btn" onclick="setSharesQuantity(25)">25</button>
+            <button type="button" class="quick-btn" onclick="setMaxShares()">MAX</button>
+          </div>
+        </div>
+
+        <!-- Calculation Summary Box -->
+        <div class="trade-summary">
+          <div class="summary-row">
+            <span>Market Price:</span>
+            <span class="mono" id="summaryPrice">$0.00</span>
+          </div>
+          <div class="summary-row">
+            <span>Quantity:</span>
+            <span class="mono" id="summaryShares">1 share</span>
+          </div>
+          <div class="summary-row">
+            <span>Estimated Order Total:</span>
+            <span class="mono" id="summaryTotal" style="color:#00f5a0">$0.00</span>
+          </div>
+        </div>
+
+        <!-- Execution Button -->
+        <button type="button" class="submit-trade-btn buy" id="btnSubmitTrade" onclick="submitTrade()">
+          <span class="material-symbols-outlined">shopping_cart_checkout</span>
+          <span id="submitTradeText">Confirm Buy Order</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // State management
+    let userBalance = Number({{ balance }});
+    let userPortfolio = {{ portfolio | tojson }};
+    let currentQuotes = new Map();
+    let currentAction = 'BUY'; // 'BUY' or 'SELL'
+    const moneyFormatters = new Map();
+
+    function formatMoney(value, currency = "USD") {
+      if (!moneyFormatters.has(currency)) {
+        moneyFormatters.set(currency, new Intl.NumberFormat(undefined, {
+          style: "currency",
+          currency: currency,
+          maximumFractionDigits: 2
+        }));
+      }
+      return moneyFormatters.get(currency).format(value);
+    }
+
+    // Update quote cards
+    function renderQuotes(quotes) {
+      const quoteList = document.getElementById("quotes");
+      quoteList.replaceChildren(...quotes.map((quote) => {
+        currentQuotes.set(quote.symbol, quote);
+
+        const card = document.createElement("article");
+        card.className = "quote";
+
+        const top = document.createElement("div");
+        top.className = "quote-top";
+        const identity = document.createElement("div");
+        const symbol = document.createElement("h3");
+        symbol.className = "symbol";
+        symbol.textContent = quote.symbol;
+        const company = document.createElement("p");
+        company.className = "company";
+        company.textContent = quote.company;
+        identity.append(symbol, company);
+
+        const tradeBtn = document.createElement("button");
+        tradeBtn.type = "button";
+        tradeBtn.className = "btn";
+        tradeBtn.style.padding = "4px 10px";
+        tradeBtn.style.fontSize = "12px";
+        tradeBtn.innerHTML = `<span class="material-symbols-outlined" style="font-size:14px;color:#00f5a0">bolt</span> Trade`;
+        tradeBtn.onclick = () => openTradeModal(quote.symbol);
+        top.append(identity, tradeBtn);
+
+        const priceRow = document.createElement("div");
+        priceRow.className = "price-row";
+        const price = document.createElement("p");
+        price.className = "price";
+        price.textContent = formatMoney(quote.price, quote.currency);
+
+        const change = document.createElement("p");
+        change.className = `change ${quote.change > 0 ? "up" : quote.change < 0 ? "down" : "neutral"}`;
+        const sign = quote.change > 0 ? "+" : "";
+        change.textContent = `${sign}${formatMoney(quote.change, quote.currency)} (${sign}${quote.change_percent.toFixed(2)}%)`;
+        priceRow.append(price, change);
+
+        const footer = document.createElement("div");
+        footer.className = "quote-footer";
+        const time = document.createElement("span");
+        time.className = "quote-time";
+        time.textContent = `Updated ${new Date(quote.updated_at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
+        footer.append(time);
+
+        card.append(top, priceRow, footer);
+        return card;
+      }));
+
+      document.getElementById("feed-dot").className = "feed-dot live";
+      document.getElementById("feed-status").textContent = `Updated ${new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
+
+      // Update calculations across portfolio
+      refreshPortfolioCalculations();
+      if (document.getElementById("tradeModal").classList.contains("open")) {
+        calculateTradeTotal();
+      }
+    }
+
+    // Refresh portfolio prices and values
+    function refreshPortfolioCalculations() {
+      let totalPortfolioValue = 0;
+
+      userPortfolio.forEach((pos) => {
+        const quote = currentQuotes.get(pos.symbol);
+        if (quote) {
+          const currPrice = quote.price;
+          const totalVal = pos.shares * currPrice;
+          totalPortfolioValue += totalVal;
+
+          const totalCost = pos.shares * pos.average_price;
+          const pnl = totalVal - totalCost;
+          const pnlPercent = totalCost > 0 ? (pnl / totalCost) * 100 : 0;
+
+          const currEl = document.getElementById(`pos-curr-${pos.symbol}`);
+          const valEl = document.getElementById(`pos-val-${pos.symbol}`);
+          const pnlEl = document.getElementById(`pos-pnl-${pos.symbol}`);
+
+          if (currEl) currEl.textContent = formatMoney(currPrice);
+          if (valEl) valEl.textContent = formatMoney(totalVal);
+          if (pnlEl) {
+            const sign = pnl >= 0 ? "+" : "";
+            const color = pnl >= 0 ? "#00f5a0" : "#ffb4ab";
+            pnlEl.innerHTML = `<span style="color:${color};font-family:'JetBrains Mono',monospace;font-weight:600">${sign}${formatMoney(pnl)} (${sign}${pnlPercent.toFixed(2)}%)</span>`;
+          }
+        }
+      });
+
+      document.getElementById("stat-portfolio").textContent = formatMoney(totalPortfolioValue);
+      document.getElementById("stat-networth").textContent = formatMoney(userBalance + totalPortfolioValue);
+      document.getElementById("stat-cash").textContent = formatMoney(userBalance);
+      document.getElementById("header-balance").textContent = formatMoney(userBalance);
+    }
+
+    // Fetch live market quotes
+    async function updateQuotes() {
+      try {
+        const response = await fetch("{{ url_for('quotes') }}", { headers: { Accept: "application/json" } });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Failed to load quotes");
+        renderQuotes(data.quotes);
+      } catch (err) {
+        document.getElementById("feed-dot").className = "feed-dot error";
+        document.getElementById("feed-status").textContent = "Market data delayed";
+      }
+    }
+
+    // Trade Modal Controls
+    function openTradeModal(symbol = "AAPL", action = "BUY") {
+      const modal = document.getElementById("tradeModal");
+      const stockSelect = document.getElementById("tradeStockSelect");
+      if (symbol && stockSelect) {
+        stockSelect.value = symbol;
+      }
+      setTradeAction(action);
+      hideModalAlert();
+      modal.classList.add("open");
+      calculateTradeTotal();
+    }
+
+    function closeTradeModal() {
+      document.getElementById("tradeModal").classList.remove("open");
+    }
+
+    function handleBackdropClick(e) {
+      if (e.target.id === "tradeModal") closeTradeModal();
+    }
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeTradeModal();
+    });
+
+    function setTradeAction(action) {
+      currentAction = action;
+      const tabBuy = document.getElementById("tabBuy");
+      const tabSell = document.getElementById("tabSell");
+      const submitBtn = document.getElementById("btnSubmitTrade");
+      const submitText = document.getElementById("submitTradeText");
+
+      if (action === "BUY") {
+        tabBuy.className = "action-tab active-buy";
+        tabSell.className = "action-tab";
+        submitBtn.className = "submit-trade-btn buy";
+        submitText.textContent = "Confirm Buy Order";
+      } else {
+        tabBuy.className = "action-tab";
+        tabSell.className = "action-tab active-sell";
+        submitBtn.className = "submit-trade-btn sell";
+        submitText.textContent = "Confirm Sell Order";
+      }
+      calculateTradeTotal();
+    }
+
+    function onStockSelectChange() {
+      calculateTradeTotal();
+    }
+
+    function setSharesQuantity(n) {
+      document.getElementById("tradeSharesInput").value = n;
+      calculateTradeTotal();
+    }
+
+    function setMaxShares() {
+      const symbol = document.getElementById("tradeStockSelect").value;
+      const quote = currentQuotes.get(symbol);
+      const price = quote ? quote.price : 0;
+
+      if (currentAction === "BUY") {
+        if (price > 0) {
+          const maxShares = Math.floor(userBalance / price);
+          document.getElementById("tradeSharesInput").value = Math.max(1, maxShares);
+        }
+      } else {
+        const pos = userPortfolio.find(p => p.symbol === symbol);
+        const owned = pos ? pos.shares : 0;
+        document.getElementById("tradeSharesInput").value = Math.max(1, owned);
+      }
+      calculateTradeTotal();
+    }
+
+    function calculateTradeTotal() {
+      const symbol = document.getElementById("tradeStockSelect").value;
+      const quote = currentQuotes.get(symbol);
+      const price = quote ? quote.price : 0;
+      const sharesInput = document.getElementById("tradeSharesInput");
+      let shares = parseInt(sharesInput.value) || 0;
+      if (shares < 1) shares = 1;
+
+      const total = shares * price;
+
+      document.getElementById("tradeSelectedPriceBadge").textContent = `Market Price: ${formatMoney(price)}`;
+      document.getElementById("summaryPrice").textContent = formatMoney(price);
+      document.getElementById("summaryShares").textContent = `${shares} share${shares > 1 ? 's' : ''}`;
+      document.getElementById("summaryTotal").textContent = formatMoney(total);
+
+      const contextEl = document.getElementById("tradeAvailableContext");
+      if (currentAction === "BUY") {
+        contextEl.textContent = `Available Cash: ${formatMoney(userBalance)}`;
+        document.getElementById("submitTradeText").textContent = `Confirm Buy (${formatMoney(total)})`;
+      } else {
+        const pos = userPortfolio.find(p => p.symbol === symbol);
+        const owned = pos ? pos.shares : 0;
+        contextEl.textContent = `You own: ${owned} shares`;
+        document.getElementById("submitTradeText").textContent = `Confirm Sell (${formatMoney(total)})`;
+      }
+    }
+
+    function showModalAlert(msg, isSuccess = true) {
+      const alertBox = document.getElementById("modalAlert");
+      const icon = document.getElementById("modalAlertIcon");
+      const msgEl = document.getElementById("modalAlertMsg");
+
+      alertBox.className = `trade-alert ${isSuccess ? 'success' : 'error'}`;
+      icon.textContent = isSuccess ? 'check_circle' : 'error';
+      msgEl.textContent = msg;
+    }
+
+    function hideModalAlert() {
+      document.getElementById("modalAlert").style.display = "none";
+    }
+
+    // Submit Trade Order to Backend
+    async function submitTrade() {
+      const symbol = document.getElementById("tradeStockSelect").value;
+      const shares = parseInt(document.getElementById("tradeSharesInput").value) || 0;
+      const btn = document.getElementById("btnSubmitTrade");
+
+      if (shares <= 0) {
+        showModalAlert("Please enter a valid quantity of shares.", false);
+        return;
+      }
+
+      btn.disabled = true;
+      const originalText = document.getElementById("submitTradeText").textContent;
+      document.getElementById("submitTradeText").textContent = "Executing Order…";
+
+      try {
+        const response = await fetch("{{ url_for('trade') }}", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            symbol: symbol,
+            action: currentAction,
+            shares: shares
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || "Trade execution failed");
+        }
+
+        // Trade successful
+        userBalance = data.new_balance;
+        userPortfolio = data.portfolio;
+
+        showModalAlert(`Success! ${data.message} for ${formatMoney(data.total)}`, true);
+        refreshPortfolioTable();
+        refreshPortfolioCalculations();
+        addTradeHistoryRow(data);
+
+        // Auto close modal after brief delay
+        setTimeout(() => {
+          closeTradeModal();
+        }, 1500);
+
+      } catch (err) {
+        showModalAlert(err.message, false);
+      } finally {
+        btn.disabled = false;
+        document.getElementById("submitTradeText").textContent = originalText;
+      }
+    }
+
+    function refreshPortfolioTable() {
+      const tbody = document.getElementById("portfolio-tbody");
+      document.getElementById("holdings-count").textContent = `${userPortfolio.length} Position(s)`;
+
+      if (userPortfolio.length === 0) {
+        tbody.innerHTML = `
+          <tr id="empty-portfolio-row">
+            <td colspan="7" class="empty-state">
+              You do not own any stocks yet. Click <strong>"Trade Now"</strong> or select a stock from the watchlist below to start investing!
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = userPortfolio.map(pos => `
+        <tr id="pos-row-${pos.symbol}">
+          <td><strong style="color:#dfe2ee;letter-spacing:0.04em">${pos.symbol}</strong></td>
+          <td class="mono" style="font-weight:600">${pos.shares}</td>
+          <td class="mono">${formatMoney(pos.average_price)}</td>
+          <td class="mono" id="pos-curr-${pos.symbol}">Loading…</td>
+          <td class="mono" id="pos-val-${pos.symbol}" style="font-weight:600">Loading…</td>
+          <td id="pos-pnl-${pos.symbol}">Loading…</td>
+          <td style="text-align:right">
+            <button type="button" class="btn" style="padding:4px 10px;font-size:12px" onclick="openTradeModal('${pos.symbol}', 'BUY')">Buy</button>
+            <button type="button" class="btn btn-danger" style="padding:4px 10px;font-size:12px" onclick="openTradeModal('${pos.symbol}', 'SELL')">Sell</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function addTradeHistoryRow(trade) {
+      const tbody = document.getElementById("trade-history-tbody");
+      const emptyRow = document.getElementById("empty-history-row");
+      if (emptyRow) emptyRow.remove();
+
+      const newRow = document.createElement("tr");
+      const actionColor = trade.action === 'BUY' ? '#00f5a0' : '#ffb4ab';
+      newRow.innerHTML = `
+        <td><span style="color:${actionColor};font-weight:700">${trade.action}</span></td>
+        <td><strong>${trade.symbol}</strong></td>
+        <td class="mono">${trade.shares}</td>
+        <td class="mono">${formatMoney(trade.price)}</td>
+        <td class="mono" style="font-weight:600">${formatMoney(trade.total)}</td>
+        <td style="color:#849588;font-size:12px">${new Date().toLocaleString()}</td>
+      `;
+      tbody.prepend(newRow);
+    }
+
+    // Initial load and recurring interval
+    updateQuotes();
+    window.setInterval(updateQuotes, 60_000);
+  </script>
+</body>
+</html>
